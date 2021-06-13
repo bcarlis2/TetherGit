@@ -9,11 +9,14 @@ public class Tether : MonoBehaviour
     public float distance;
     public float angle;
     public int numOfKnots;
+    public int children;
     public float boundsX;
     public float boundsY;
+    public bool broken = false;
     // Start is called before the first frame update
     void Start()
     {
+        children = 0;
         distance = 0f;
         angle = 0f;
         numOfKnots = 0;
@@ -25,16 +28,19 @@ public class Tether : MonoBehaviour
         if (!player)
             return;
 
+        /* Track Child Count (For Debugging) */
+        numOfKnots = transform.childCount;
+
+        /* Face The Player */
         Vector3 dir = player.position - transform.position;
         float angle = Mathf.Atan2(dir.y,dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(angle -90, Vector3.forward);
-    }
 
-    void FixedUpdate()
-    {
-        if (!player)
+        /* Knots */
+
+        if (broken)
             return;
-
+            
         distance = Vector2.Distance(transform.position,player.position);
         angle = Vector2.Angle(transform.position,player.position);
 
@@ -46,8 +52,11 @@ public class Tether : MonoBehaviour
             removeKnots(numOfKnots - newKnots);
         }
 
+        //numOfKnots = newKnots;
+        numOfKnots = transform.childCount;
 
-        numOfKnots = newKnots;
+        /* Track Child Count (For Debugging) */
+        children = transform.childCount;
     }
 
     void addKnots(int numToAdd) {
@@ -63,6 +72,15 @@ public class Tether : MonoBehaviour
         for (int i=0; i < numToRemove; i++) 
         {
             Destroy(transform.GetChild(transform.childCount-1).gameObject);
+        }
+    }
+
+    public void deleteTether() {
+        Debug.Log("Deleting Tether");
+        broken = true;
+        foreach (Transform child in transform) {
+            if (child)
+                Destroy(child.gameObject);
         }
     }
 
@@ -87,7 +105,9 @@ public class Tether : MonoBehaviour
     void OnTriggerExit2D(Collider2D other) {
         if (other.gameObject.CompareTag("Player")) {
             Debug.Log("Tether lost Player");
+            deleteTether();
             player = null;
+            broken = false;
         }
     }
 }

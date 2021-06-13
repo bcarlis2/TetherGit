@@ -30,9 +30,17 @@ public class Knot : MonoBehaviour
         SpriteRenderer sprite = GetComponent<SpriteRenderer>(); //Set the reference to our SpriteRenderer component
         boundsX = sprite.bounds.extents.x * 2; //Distance to the right side, from your center point
         //-sprite.bounds.extents.x //Distance to the left side
-        boundsY = sprite.bounds.extents.y * 2;//Distance to the top
+        boundsY = sprite.bounds.extents.y *2;//Distance to the top
         //-sprite.bounds.extents.y //Distance to the bottom
     }
+
+    void OnTriggerEnter2D(Collider2D other) {
+        if (other.gameObject.CompareTag("Obstacle")) {
+            Debug.Log("Tether found Obstacle");
+            transform.parent.gameObject.GetComponent<Tether>().deleteTether();
+        }
+    }
+
 
     /*
     void findKnotNum() {
